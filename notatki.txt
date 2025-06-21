@@ -1,0 +1,86 @@
+AUTENTYKACJA
+ - w module rejestrujesz JwtModule jako import
+ - definiujesz JWT constans
+ - w robisz funkcję signIn, która pobiera użytkownika o podanym nicku z bazy, sprawdza czy hasło zapisane i podane są takie same i generuje jwt i go zwraca do klienta
+ - tworzysz funkcję register, która haszuje i dodaje do bazy
+ - tworzysz authguarda, który weryfikuje tokeny
+
+AUTORYZACJA
+Oprócz tego co powyżej, należy przygotować:
+- enum z rolami
+- dekorator Roles() - który pobiera metadane i przekazuje do roles guarda
+- roles guarda
+do chronionych routów dodajemy:
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard, RolesGuard)
+
+Aby zintegrować moduł auth z resztą aplikacji, np. żeby nowe zadanie dodawało się tylko na konto konkretnego użytkownika, to używamy AuthGuard i za pomocą @Res() pobieramy userId, które jest dostarczane przez jwt.
+
+Guardy: muszą implementować CanActivate
+
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+
+@Injectable()
+export class MyGuard implements CanActivate {
+  canActivate(context: ExecutionContext): boolean {
+    // logika dostępu
+    return true;
+  }
+}
+
+// Pipe
+import { PipeTransform, Injectable, ArgumentMetadata } from '@nestjs/common';
+
+@Injectable()
+export class MyPipe implements PipeTransform {
+  transform(value: any, metadata: ArgumentMetadata) {
+    // modyfikacja lub walidacja value
+    return value;
+  }
+}
+
+// interceptor
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
+
+@Injectable()
+export class MyInterceptor implements NestInterceptor {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    console.log('Before...');
+    return next.handle().pipe(
+      tap(() => console.log('After...')),
+    );
+  }
+}
+
+
+//exception filter
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException } from '@nestjs/common';
+
+@Catch(HttpException)
+export class MyFilter implements ExceptionFilter {
+  catch(exception: HttpException, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse();
+
+    response.status(exception.getStatus()).json({
+      statusCode: exception.getStatus(),
+      message: exception.message,
+    });
+  }
+}
+
+// Middleware:
+import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
+
+@Injectable()
+export class MyMiddleware implements NestMiddleware {
+  use(req: Request, res: Response, next: NextFunction) {
+    console.log('Request...');
+    next();
+  }
+}
+
+
