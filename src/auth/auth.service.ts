@@ -39,7 +39,7 @@ export class AuthService {
     }
     //* if the user is found and the password matches, generate a JWT token and send it back
     const payload = {
-      sub: user.userId,
+      // sub: user.userId,
       username: user.username,
       roles: user.role,
     };
@@ -57,7 +57,7 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(pass, 10); // 10 salt rounds
 
     this.usersService.addUser({
-      userId: Date.now(), // lub inna logika generowania ID
+      // userId: Date.now(), // lub inna logika generowania ID
       username,
       password: hashedPassword,
       role: Role.User,

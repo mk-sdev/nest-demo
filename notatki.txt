@@ -16,6 +16,24 @@ do chronionych routów dodajemy:
 
 Aby zintegrować moduł auth z resztą aplikacji, np. żeby nowe zadanie dodawało się tylko na konto konkretnego użytkownika, to używamy AuthGuard i za pomocą @Res() pobieramy userId, które jest dostarczane przez jwt.
 
+BAZA DANYCH (TypeORM)
+ - w app.module dodaj import TypeOrmModule.forRoot({...})
+ - stwórz entity - klasę reprezentującą tabelę
+ - w module w którym używasz bazy dodaj imports: [TypeOrmModule.forFeature([User])],
+ - w serwisie wsztruknij:     
+    @InjectRepository(UserEntity)
+    private usersRepository: Repository<UserEntity>,
+ - użyj w serwisie funkcji np. this.usersRepository.find()
+
+ MONGODB (mongoose):
+ - w app.module dodaj import MongooseModule.forRoot('mongodb://localhost:27017/nestdb')
+ - utwórz schema
+ - w module ze schema dodaj import: MongooseModule.forFeature([{ name: User_.name, schema: UserSchema }])
+ - wstrzyknij model w serwis: @InjectModel(User_.name) private userModel: Model<UserDocument>
+ - użyj funkcji w serwisie
+
+ UWAGA: nie trzeba podawać w kodzie ID, bo baza sama za nas je wygeneruje 
+
 Guardy: muszą implementować CanActivate
 
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';

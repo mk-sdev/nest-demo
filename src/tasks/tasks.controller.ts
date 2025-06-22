@@ -36,7 +36,7 @@ export class TasksController {
   // @Redirect('/tasks')
   create(@Body() body: CreateTaskDto, @Request() req) {
     const userId = req.user.userId;
-    console.log('first')
+    console.log('first');
     this.tasksService.addOne(body.title, userId);
   }
 
