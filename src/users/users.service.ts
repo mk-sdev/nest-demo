@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from 'src/enums/role.enum';
 import { User as UserEntity } from './user.entity';
@@ -7,7 +7,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UserDocument } from './user.schema';
 import { User as User_ } from './user.schema';
-
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 interface User {
   userId: number;
   username: string;
@@ -21,6 +22,8 @@ export class UsersService {
     @InjectRepository(UserEntity)
     private usersRepository: Repository<UserEntity>,
     @InjectModel(User_.name) private userModel: Model<UserDocument>,
+    @Inject(CACHE_MANAGER)
+    private cacheManager: Cache,
   ) {}
 
   private readonly users: User[] = [
@@ -51,36 +54,51 @@ export class UsersService {
   // }
 
   //* TypeORM:
-  
-  getAllUsers(): Promise<User[]> {
-    return this.usersRepository.find();
+
+  async getAllUsers(): Promise<User[]> {
+    const cacheKey = 'all_users';
+
+    const cached = await this.cacheManager.get<User[]>(cacheKey);
+    if (cached) {
+      console.log('cached users found');
+      return cached;
+    }
+
+    const users = await this.usersRepository.find();
+    try {
+      await this.cacheManager.set(cacheKey, users); // Poprawiony zapis ttl
+    } catch (error) {
+      console.error('Error setting cache:', error);
+    }
+    console.log('non-cached users found');
+    return users;
   }
 
-  // findOne(username: string): Promise<User | null> {
-  //   return this.usersRepository.findOne({ where: { username } });
-  // }
+  findOne(username: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { username } });
+  }
 
-  // addUser(user: Partial<User>): Promise<User> {
-  //   const newUser = this.usersRepository.create(user);
-  //   return this.usersRepository.save(newUser);
-  // }
+  addUser(user: Partial<User>): Promise<User> {
+    const newUser = this.usersRepository.create(user);
+    return this.usersRepository.save(newUser);
+  }
 
   //* Mongo:
 
-  async addUser({
-    username,
-    password,
-    role,
-  }: {
-    username: string;
-    password: string;
-    role: Role;
-  }) {
-    const created = new this.userModel({ username, password, role });
-    return created.save();
-  }
+  // async addUser({
+  //   username,
+  //   password,
+  //   role,
+  // }: {
+  //   username: string;
+  //   password: string;
+  //   role: Role;
+  // }) {
+  //   const created = new this.userModel({ username, password, role });
+  //   return created.save();
+  // }
 
-  async findOne(username: string) {
-    return this.userModel.findOne({ username });
-  }
+  // async findOne(username: string) {
+  //   return this.userModel.findOne({ username });
+  // }
 }

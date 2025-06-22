@@ -34,6 +34,25 @@ BAZA DANYCH (TypeORM)
 
  UWAGA: nie trzeba podawać w kodzie ID, bo baza sama za nas je wygeneruje 
 
+REDIS:
+-  w module gdzie będzie używany: 
+import * as redisStore from 'cache-manager-ioredis';
+import { CacheModule } from '@nestjs/cache-manager';
+    CacheModule.registerAsync({
+      useFactory: () => ({
+        store: redisStore,
+        host: 'localhost',
+        port: 6379,
+        ttl: 1000, // na ile milisekund ma się zapamiętać
+      }),
+    }),
+- w serwisie wstrzyknąć:     
+    @Inject(CACHE_MANAGER)
+    private cacheManager: Cache,
+a także zaimportować:
+  import { CACHE_MANAGER } from '@nestjs/cache-manager';
+  import { Cache } from 'cache-manager';
+
 Guardy: muszą implementować CanActivate
 
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
