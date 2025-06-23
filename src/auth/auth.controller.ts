@@ -8,6 +8,7 @@ import {
   Get,
   Request,
   Render,
+  Redirect,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
@@ -15,7 +16,8 @@ import { Roles } from 'src/enums/roles.decorator';
 import { Role } from 'src/enums/role.enum';
 import { RolesGuard } from 'src/enums/roles.guard';
 import { UsersService } from 'src/users/users.service';
-
+import { Response } from 'express';
+import { Res } from '@nestjs/common';
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -39,10 +41,34 @@ export class AuthController {
     return { message: 'Please log in' }; // Możesz przekazać dodatkowe dane do widoku
   }
 
-  @HttpCode(HttpStatus.OK)
   @Post('login')
-  signIn(@Body() signInDto: Record<string, any>) {
-    return this.authService.signIn(signInDto.username, signInDto.password);
+  @Redirect('profile')
+  @HttpCode(HttpStatus.OK)
+  async signIn(
+    @Body() signInDto: Record<string, any>,
+    @Res({ passthrough: true }) response: Response, // <- ważne
+  ) {
+    const { access_token } = await this.authService.signIn(
+      signInDto.username,
+      signInDto.password,
+    );
+
+    response.cookie('jwt', access_token, {
+      httpOnly: true, // uniemożliwia dostęp do ciasteczka z JS
+      secure: false, // ustaw `true` jeśli HTTPS
+      sameSite: 'lax', // lub 'strict' / 'none' (zależnie od potrzeb)
+      maxAge: 1000 * 60 * 60 * 24, // 1 dzień
+    });
+
+    return { message: 'Login successful' };
+  }
+
+  @Post('logout')
+  @Render('login') // Renderuje widok 'login' po wylogowaniu
+  @HttpCode(HttpStatus.OK)
+  logout(@Res({ passthrough: true }) response: Response) {
+    response.clearCookie('jwt');
+    return { message: 'Logged out successfully' };
   }
 
   @Post('register')

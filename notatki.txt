@@ -4,6 +4,9 @@ AUTENTYKACJA
  - w robisz funkcję signIn, która pobiera użytkownika o podanym nicku z bazy, sprawdza czy hasło zapisane i podane są takie same i generuje jwt i go zwraca do klienta
  - tworzysz funkcję register, która haszuje i dodaje do bazy
  - tworzysz authguarda, który weryfikuje tokeny
+ - w main.ts:
+  import * as cookieParser from 'cookie-parser';
+  app.use(cookieParser())
 
 AUTORYZACJA
 Oprócz tego co powyżej, należy przygotować:

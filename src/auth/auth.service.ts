@@ -27,13 +27,15 @@ export class AuthService {
     username: string,
     pass: string,
   ): Promise<{ access_token: string }> {
+    console.log('🚀 ~ AuthService ~ username:', username);
     const user = await this.usersService.findOne(username); //* find a user with a provided nick
     if (!user) {
-      throw new UnauthorizedException(); // <- ciągle rzuca wyjątek
+      throw new UnauthorizedException();
     }
     //* check if the password matches
     const isPasswordValid: boolean = await bcrypt.compare(pass, user.password);
-    console.log('🚀 ~ AuthService ~ isPasswordValid:', isPasswordValid);
+    console.log('🚀 ~ AuthService ~ pass:', pass);
+    console.log('🚀 ~ AuthService ~ user.password:', user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException();
     }
@@ -56,7 +58,7 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(pass, 10); // 10 salt rounds
 
-    this.usersService.addUser({
+    await this.usersService.addUser({
       // userId: Date.now(), // lub inna logika generowania ID
       username,
       password: hashedPassword,
