@@ -1,14 +1,15 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Role } from 'src/enums/role.enum';
-import { User as UserEntity } from './user.entity';
-import { Repository } from 'typeorm';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { UserDocument } from './user.schema';
-import { User as User_ } from './user.schema';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
+import { Model } from 'mongoose';
+import { PrismaService } from 'prisma/prisma.service';
+import { Role } from 'src/enums/role.enum';
+import { Repository } from 'typeorm';
+import { User as UserEntity } from './user.entity';
+import { User as User_, UserDocument } from './user.schema';
+
 interface User {
   userId: number;
   username: string;
@@ -24,6 +25,7 @@ export class UsersService {
     @InjectModel(User_.name) private userModel: Model<UserDocument>,
     @Inject(CACHE_MANAGER)
     private cacheManager: Cache,
+    private prisma: PrismaService,
   ) {}
 
   private readonly users: User[] = [
@@ -82,6 +84,11 @@ export class UsersService {
     const newUser = this.usersRepository.create(user);
     return this.usersRepository.save(newUser);
   }
+
+  //* prisma:
+  // async getAllUsers() {
+  //   return this.prisma.user.findMany();
+  // }
 
   //* Mongo:
 

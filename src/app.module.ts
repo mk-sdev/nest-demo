@@ -7,6 +7,8 @@ import { UsersModule } from './users/users.module';
 // import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
+import { PrismaModule } from 'prisma/prisma.module';
 
 @Module({
   controllers: [AppController],
@@ -26,6 +28,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       synchronize: true, // tylko w dev — w produkcji = false
     }),
     MongooseModule.forRoot('mongodb://localhost:27017/nestdb'),
+    ConfigModule.forRoot({
+      isGlobal: true, // ← umożliwia korzystanie z .env w całej aplikacji
+    }),
+    PrismaModule,
     // CacheModule.register({
     //   isGlobal: true,
     //   useFactory: () => ({

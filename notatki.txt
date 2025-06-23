@@ -56,6 +56,74 @@ a także zaimportować:
   import { CACHE_MANAGER } from '@nestjs/cache-manager';
   import { Cache } from 'cache-manager';
 
+PRISMA:
+- npm install prisma --save-dev
+  npm install @prisma/client
+  npm install @nestjs/config
+- stwórz plik .env i wpisz: DATABASE_URL="mysql://user:password@localhost:3306/nazwa_bazy"
+- w app.module dodaj: 
+  import { ConfigModule } from '@nestjs/config';
+  ConfigModule.forRoot({
+    isGlobal: true, // ← umożliwia korzystanie z .env w całej aplikacji
+  }),
+- zainicjuj prisma: npx prisma init
+  to utworzy ci folder prisma, a w nim schema.prisma. Do tego pliku wpisz:
+  generator client {
+    provider = "prisma-client-js"
+  }
+
+  datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+  }
+- w tym samym pliku utwórz model:
+  model User {
+    userId   Int    @id @default(autoincrement())
+    username String @unique
+    password String
+  }
+- wygeneruj klienta prisma i zmigruj bazę:
+  npx prisma migrate dev --name init
+- w folderze pisma stwórz prisma.service.ts:
+    // src/prisma/prisma.service.ts
+    import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+    import { PrismaClient } from '@prisma/client';
+
+    @Injectable()
+    export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+      async onModuleInit() {
+        await this.$connect();
+      }
+
+      async onModuleDestroy() {
+        await this.$disconnect();
+      }
+    }
+- tak samo stwórz moduł:
+  // src/prisma/prisma.module.ts
+  import { Global, Module } from '@nestjs/common';
+  import { PrismaService } from './prisma.service';
+
+  @Global() // ← dzięki temu nie trzeba importować w każdym module
+  @Module({
+    providers: [PrismaService],
+    exports: [PrismaService],
+  })
+  export class PrismaModule {}
+- dodaj ten moduł do app.module
+  użyj prisma w serwisach:
+  import { PrismaService } from '../prisma/prisma.service';
+  ...
+  constructor(private prisma: PrismaService) {}
+  ...
+  return this.prisma.user.findMany();
+- po drodze jeszcze  było coś takiego jak "prisma generate" xdd ale już nie pamiętam gdzie dokładnie. W każdym razie jak wywala błąd  wterminalu to pewnie wtedy. Tak samo jak dokonujesz jakiejś zmiany w schema.prisma to prisma generate
+
+
+
+
+
+
 Guardy: muszą implementować CanActivate
 
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
