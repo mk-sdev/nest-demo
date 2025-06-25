@@ -9,6 +9,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from 'prisma/prisma.module';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   controllers: [AppController],
@@ -32,6 +33,17 @@ import { PrismaModule } from 'prisma/prisma.module';
       isGlobal: true, // ← umożliwia korzystanie z .env w całej aplikacji
     }),
     PrismaModule,
+    ClientsModule.register([
+      {
+        name: 'USER_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: ['amqp://localhost:5672'],
+          queue: 'user_queue',
+          queueOptions: { durable: false },
+        },
+      },
+    ]),
     // CacheModule.register({
     //   isGlobal: true,
     //   useFactory: () => ({

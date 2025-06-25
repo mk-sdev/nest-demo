@@ -119,8 +119,54 @@ PRISMA:
   return this.prisma.user.findMany();
 - po drodze jeszcze  było coś takiego jak "prisma generate" xdd ale już nie pamiętam gdzie dokładnie. W każdym razie jak wywala błąd  wterminalu to pewnie wtedy. Tak samo jak dokonujesz jakiejś zmiany w schema.prisma to prisma generate
 
+RABBITMQ:
+- pnpm install @nestjs/microservices amqplib
+- w main.ts:
+  import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+  ...
+    app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.RMQ,
+    options: {
+      urls: ['amqp://localhost:5672'],
+      queue: 'user_queue',
+      queueOptions: { durable: false },
+    },
+  });
 
+  await app.startAllMicroservices();
+- w app.module:
+  import { ClientsModule, Transport } from '@nestjs/microservices';
+  ...
+      ClientsModule.register([
+      {
+        name: 'USER_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: ['amqp://localhost:5672'],
+          queue: 'user_queue',
+          queueOptions: { durable: false },
+        },
+      },
+    ]),
+- w serwisie:
+  import { ClientProxy } from '@nestjs/microservices';
+  ...
+    constructor(@Inject('USER_SERVICE') private client: ClientProxy) {}
 
+  sendUserData(user: any) {
+    return this.client.emit('user_created', user);
+  }
+- w kontrolerze:
+  import { EventPattern } from '@nestjs/microservices';
+    @EventPattern('user_created')
+  handleUserCreated(data: any) {
+    console.log('User received in consumer:', data);
+  }
+
+  @Post('send')
+  send(@Body() user: any) {
+    return this.appService.sendUserData(user);
+  }
 
 
 
