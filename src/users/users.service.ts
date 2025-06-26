@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
 import { Model } from 'mongoose';
-import { PrismaService } from 'prisma/prisma.service';
+// import { PrismaService } from 'prisma/prisma.service';
 import { Role } from 'src/enums/role.enum';
 import { Repository } from 'typeorm';
 import { User as UserEntity } from './user.entity';
@@ -25,7 +25,7 @@ export class UsersService {
     @InjectModel(User_.name) private userModel: Model<UserDocument>,
     @Inject(CACHE_MANAGER)
     private cacheManager: Cache,
-    private prisma: PrismaService,
+    // private prisma: PrismaService,
   ) {}
 
   private readonly users: User[] = [
