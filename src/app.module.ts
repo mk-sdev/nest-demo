@@ -33,6 +33,8 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
       isGlobal: true, // ← umożliwia korzystanie z .env w całej aplikacji
     }),
     PrismaModule,
+
+    // serwis emitujący
     ClientsModule.register([
       {
         name: 'USER_SERVICE',
@@ -41,6 +43,21 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
           urls: ['amqp://localhost:5672'],
           queue: 'user_queue',
           queueOptions: { durable: false },
+        },
+      },
+    ]),
+
+    ClientsModule.register([
+      {
+        name: 'NEST_TO_SPRING_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: ['amqp://localhost:5672'],
+          queue: 'nest_to_spring_queue',
+          queueOptions: { durable: false },
+          exchange: 'nest_spring_exchange',
+          exchangeType: 'topic',
+          routingKey: 'nest_to_spring',
         },
       },
     ]),
