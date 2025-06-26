@@ -9,7 +9,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    // TypeOrmModule.forFeature([User]),
     MongooseModule.forFeature([{ name: User_.name, schema: UserSchema }]),
     CacheModule.registerAsync({
       useFactory: () => ({
