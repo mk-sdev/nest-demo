@@ -10,6 +10,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from 'prisma/prisma.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { MailerModule } from '@nestjs-modules/mailer';
+// import { join } from 'path';
 
 @Module({
   controllers: [AppController],
@@ -61,6 +63,21 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         },
       },
     ]),
+
+    MailerModule.forRoot({
+      transport: {
+        host: 'sandbox.smtp.mailtrap.io',
+        port: 587,
+        secure: false,
+        auth: {
+          user: 'b893e8bb7dd03d',
+          pass: '2be56f146162ef',
+        },
+      },
+      defaults: {
+        from: '"Twoja Apka" <no-reply@twoja-apka.pl>',
+      },
+    }),
     // CacheModule.register({
     //   isGlobal: true,
     //   useFactory: () => ({

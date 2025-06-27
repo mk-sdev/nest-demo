@@ -237,4 +237,45 @@ export class MyMiddleware implements NestMiddleware {
   }
 }
 
+expo:
+- dodawanie zdjęć (wielu na raz), gdzie można określić: tagi, opis, miejsce wyświetlają się tam 
+  też ostatnio używane i najpopularniejsze tagi
+- wyświetlanie zdjęć i zaawansowanie opcje filtrowania
+- zanim wyświetlanie to zapytanie do cloudflare workers o autoryzację, tylko nwm czy wszystkie 
+  na raz, czy w pętli, czy w grupach co 10.
+- auth panel
+- wyświetlanie ostatnich zdjęć z galerii
+- pobieranie zdjęć jako lazy load + infinite scroll
+- moje konto, gdzie można usunąć, zmienić hasło lub email
+- można zaznaczyć wiele zdjęć na raz i je jednocześnie edytować lub usunąć
+- jak się tapnie na zdjęcie to się wyświetla ono + jego tagi, opis itp.
+- twoje wszystkie tagi wraz z liczbą zdjęć
+- jakiś pasek postępu w uploadingu zdjęć
+- (zaawansowane) mapka pokazująca gdzie jake zdjęcia zostały zrobione
+- (zaawansowane) wywołanie mikroserwisu Flask, którydby analizował zdjęcia i automatycznie 
+  przydzielał tagi
+- (zaawansowane) możliwość ustawienia współwłaścicieli zdjęcia tak że im też będą się one 
+  wyświetlały
+- możliwość pobrania wszystkich zdjęć na urządzenie
 
+nest auth:
+- tworzenie konta (mail i hasło)
+- usuwanie konta + dwutygodniowy okres przejściowy
+- zmienianie hasła
+- zmienianie maila
+- przypominanie hasła
+- (zaawansowane) co jeśli user  zapomniał hasła i do ImageHub i do maila
+
+spring:
+- GraphQL pobiera rekordy z bazy mongo lub postgres
+- serwer następnie je zwraca do frontendu, po drodze cache`ując
+
+- otrzymane zdjęcia (+ jwt) za pomocą RabbitMQ będą musiały być dodane do R2, a nstępnie do bazy
+  Na podstawie JWT serwer wie kogo wpisać jako właściciela w bazie
+- jednocześnie SocketIO wysyła na frontend postęp w dodawaniu
+
+- usunięcie zdjęć i je modyfikwowanie, prawdopodobnie poprzez rabbitmq (potrzebne jwt)
+
+cloudflare workers:
+- autorzyują zapytanie o obraz
+- zwracają plik zdjęciowy

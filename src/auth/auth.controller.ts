@@ -9,6 +9,7 @@ import {
   Request,
   Render,
   Redirect,
+  Query,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
@@ -17,13 +18,28 @@ import { Role } from 'src/enums/role.enum';
 import { RolesGuard } from 'src/enums/roles.guard';
 import { UsersService } from 'src/users/users.service';
 import { Response } from 'express';
+import { MailerService } from '@nestjs-modules/mailer';
 import { Res } from '@nestjs/common';
 @Controller('auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
     private usersService: UsersService,
+    private mailerService: MailerService,
   ) {}
+
+  @Get('verify')
+  async verifyEmail(@Query('email') email: string) {
+    console.log(email);
+    const verificationUrl = `https://twoja-apka.pl/verify?token=...`;
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Aktywuj konto',
+      html: `Kliknij <a href="${verificationUrl}">tutaj</a>, aby aktywować konto.`,
+    });
+
+    return { message: 'Wysłano maila weryfikacyjnego' };
+  }
 
   @Get()
   getAllUsers(): Promise<Record<string, any>[]> {
