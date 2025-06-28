@@ -13,6 +13,9 @@ export class User {
 
   @Prop({ default: 'user' })
   role: string;
+
+  @Prop()
+  refreshtoken?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -20,13 +20,13 @@ export class AuthService {
    * If the user is found and the password matches, it generates a JWT token.
    * @param username - The username of the user.
    * @param pass - The password of the user.
-   * @returns An object containing the access token.
+   * @returns An object containing the access token and refresh token.
    * @throws UnauthorizedException if the user is not found or the password does not match.
    */
   async signIn(
     username: string,
     pass: string,
-  ): Promise<{ access_token: string }> {
+  ): Promise<{ access_token: string; refresh_token: string }> {
     console.log('🚀 ~ AuthService ~ username:', username);
     const user = await this.usersService.findOne(username); //* find a user with a provided nick
     if (!user) {
@@ -41,12 +41,24 @@ export class AuthService {
     }
     //* if the user is found and the password matches, generate a JWT token and send it back
     const payload = {
-      // sub: user.userId,
       username: user.username,
       roles: user.role,
     };
+
+    const access_token = await this.jwtService.signAsync(payload, {
+      expiresIn: '15m', // access token ważny 15 minut
+    });
+
+    const refresh_token = await this.jwtService.signAsync(payload, {
+      expiresIn: '7d', // refresh token ważny 7 dni
+    });
+
+    //* zapisz refresh token do bazy
+    await this.usersService.updateRefreshToken(user.username, refresh_token);
+
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      access_token,
+      refresh_token,
     };
   }
 
@@ -65,4 +77,6 @@ export class AuthService {
       role: Role.User,
     });
   }
+
+
 }

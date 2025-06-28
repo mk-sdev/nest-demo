@@ -1,25 +1,26 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import {
   Body,
   Controller,
-  Post,
+  Get,
   HttpCode,
   HttpStatus,
-  UseGuards,
-  Get,
-  Request,
-  Render,
-  Redirect,
+  Post,
   Query,
+  Redirect,
+  Render,
+  Request,
+  Res,
+  UseGuards
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { AuthGuard } from './auth.guard';
-import { Roles } from 'src/enums/roles.decorator';
+import { Response } from 'express';
 import { Role } from 'src/enums/role.enum';
+import { Roles } from 'src/enums/roles.decorator';
 import { RolesGuard } from 'src/enums/roles.guard';
 import { UsersService } from 'src/users/users.service';
-import { Response } from 'express';
-import { MailerService } from '@nestjs-modules/mailer';
-import { Res } from '@nestjs/common';
+import { AuthGuard } from './auth.guard';
+import { AuthService } from './auth.service';
+import { accessTokenOptions, refreshTokenOptions } from './cookies';
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -45,6 +46,7 @@ export class AuthController {
   getAllUsers(): Promise<Record<string, any>[]> {
     return this.usersService.getAllUsers();
   }
+
   @Get('login')
   @Render('login') // Renderuje widok 'login' przy żądaniu GET na /auth/login
   getLoginPage() {
@@ -64,26 +66,46 @@ export class AuthController {
     @Body() signInDto: Record<string, any>,
     @Res({ passthrough: true }) response: Response, // <- ważne
   ) {
-    const { access_token } = await this.authService.signIn(
+    const { access_token, refresh_token } = await this.authService.signIn(
       signInDto.username,
       signInDto.password,
     );
 
-    response.cookie('jwt', access_token, {
-      httpOnly: true, // uniemożliwia dostęp do ciasteczka z JS
-      secure: false, // ustaw `true` jeśli HTTPS
-      sameSite: 'lax', // lub 'strict' / 'none' (zależnie od potrzeb)
-      maxAge: 1000 * 60 * 60 * 24, // 1 dzień
-    });
+    response.cookie('jwt', access_token, accessTokenOptions);
+
+    response.cookie('refresh', refresh_token, refreshTokenOptions);
 
     return { message: 'Login successful' };
   }
+
+  // @Post('refresh')
+  // @HttpCode(HttpStatus.OK)
+  // async refresh(
+  //   @Res({ passthrough: true }) response: Response,
+  //   @Request() req,
+  // ) {
+  //   const refreshToken = req.cookies?.refresh;
+
+  //   if (!refreshToken) throw new UnauthorizedException();
+
+  //   const { access_token } = await this.authService.refreshToken(refreshToken);
+
+  //   response.cookie('jwt', access_token, {
+  //     httpOnly: true,
+  //     secure: false,
+  //     sameSite: 'lax',
+  //     maxAge: 1000 * 60 * 15, // nowy token na 15 minut
+  //   });
+
+  //   return { message: 'Token refreshed' };
+  // }
 
   @Post('logout')
   @Render('login') // Renderuje widok 'login' po wylogowaniu
   @HttpCode(HttpStatus.OK)
   logout(@Res({ passthrough: true }) response: Response) {
     response.clearCookie('jwt');
+    response.clearCookie('refresh');
     return { message: 'Logged out successfully' };
   }
 

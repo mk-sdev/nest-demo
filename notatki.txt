@@ -8,6 +8,20 @@ AUTENTYKACJA
   import * as cookieParser from 'cookie-parser';
   app.use(cookieParser())
 
+- gdy user zakłada konto:
+  - haszowane jest hasło
+
+- gdy user prosi o zasoby, najpierw aktywowany jest guard.
+- on sprawdza, czy jwt istnieje
+  - jeśli nie istnieje jwt, sprawdź czy refresh token istnieje
+    - jeśli nie istnieje refresh token, wurzyć błąd i ew. przekieruj gdzies indziej, 
+    - jeśli istnieje refresh, porównaj go z tym w bazie
+      - jeśli nie są takie same, wyrzuć błąd, ew. przekieruj gdzieś indziej
+      - jeśli są takie same, wygeneruj nowy jwt i ustaw w cookie
+  - jeśli istnieje jwt, sprawdza jego poprawność
+    - jeśli niepoprawny, wyrzuć błąd i ew. przekieruj gdzieś indziej
+    - jeśli poprawny, przekeiruj do endpointa
+
 AUTORYZACJA
 Oprócz tego co powyżej, należy przygotować:
 - enum z rolami

@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
 import { Model } from 'mongoose';
-import { PrismaService } from 'prisma/prisma.service';
+// import { PrismaService } from 'prisma/prisma.service';
 import { Role } from 'src/enums/role.enum';
 import { Repository } from 'typeorm';
 import { User as UserEntity } from './user.entity';
@@ -25,7 +25,7 @@ export class UsersService {
     @InjectModel(User_.name) private userModel: Model<UserDocument>,
     @Inject(CACHE_MANAGER)
     private cacheManager: Cache,
-    private prisma: PrismaService,
+    // private prisma: PrismaService,
   ) {}
 
   private readonly users: User[] = [
@@ -57,7 +57,55 @@ export class UsersService {
 
   //* TypeORM:
 
-  async getAllUsers(): Promise<User[]> {
+  // async getAllUsers(): Promise<User[]> {
+  //   const cacheKey = 'all_users';
+
+  //   const cached = await this.cacheManager.get<User[]>(cacheKey);
+  //   if (cached) {
+  //     console.log('cached users found');
+  //     return cached;
+  //   }
+
+  //   const users = await this.usersRepository.find();
+  //   try {
+  //     await this.cacheManager.set(cacheKey, users); // Poprawiony zapis ttl
+  //   } catch (error) {
+  //     console.error('Error setting cache:', error);
+  //   }
+  //   console.log('non-cached users found');
+  //   return users;
+  // }
+
+  // findOne(username: string): Promise<User | null> {
+  //   return this.usersRepository.findOne({ where: { username } });
+  // }
+
+  // addUser(user: Partial<User>): Promise<User> {
+  //   const newUser = this.usersRepository.create(user);
+  //   return this.usersRepository.save(newUser);
+  // }
+
+  //* prisma:
+  // async getAllUsers() {
+  //   return this.prisma.user.findMany();
+  // }
+
+  //* Mongo:
+
+  async addUser({
+    username,
+    password,
+    role,
+  }: {
+    username: string;
+    password: string;
+    role: Role;
+  }) {
+    const created = new this.userModel({ username, password, role });
+    return created.save();
+  }
+
+  async getAllUsers() {
     const cacheKey = 'all_users';
 
     const cached = await this.cacheManager.get<User[]>(cacheKey);
@@ -66,7 +114,7 @@ export class UsersService {
       return cached;
     }
 
-    const users = await this.usersRepository.find();
+    const users = await this.userModel.find();
     try {
       await this.cacheManager.set(cacheKey, users); // Poprawiony zapis ttl
     } catch (error) {
@@ -76,36 +124,11 @@ export class UsersService {
     return users;
   }
 
-  findOne(username: string): Promise<User | null> {
-    return this.usersRepository.findOne({ where: { username } });
+  async findOne(username: string) {
+    return this.userModel.findOne({ username });
   }
 
-  addUser(user: Partial<User>): Promise<User> {
-    const newUser = this.usersRepository.create(user);
-    return this.usersRepository.save(newUser);
+  async updateRefreshToken(username: string, token: string) {
+    await this.userModel.updateOne({ username }, { refreshtoken: token });
   }
-
-  //* prisma:
-  // async getAllUsers() {
-  //   return this.prisma.user.findMany();
-  // }
-
-  //* Mongo:
-
-  // async addUser({
-  //   username,
-  //   password,
-  //   role,
-  // }: {
-  //   username: string;
-  //   password: string;
-  //   role: Role;
-  // }) {
-  //   const created = new this.userModel({ username, password, role });
-  //   return created.save();
-  // }
-
-  // async findOne(username: string) {
-  //   return this.userModel.findOne({ username });
-  // }
 }

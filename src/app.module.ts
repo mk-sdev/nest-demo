@@ -8,7 +8,7 @@ import { UsersModule } from './users/users.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { PrismaModule } from 'prisma/prisma.module';
+// import { PrismaModule } from 'prisma/prisma.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { MailerModule } from '@nestjs-modules/mailer';
 // import { join } from 'path';
@@ -34,7 +34,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
     ConfigModule.forRoot({
       isGlobal: true, // ← umożliwia korzystanie z .env w całej aplikacji
     }),
-    PrismaModule,
+    // PrismaModule,
 
     // serwis emitujący
     ClientsModule.register([
