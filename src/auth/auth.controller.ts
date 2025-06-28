@@ -11,7 +11,7 @@ import {
   Render,
   Request,
   Res,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { Role } from 'src/enums/role.enum';

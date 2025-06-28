@@ -7,6 +7,8 @@ import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Role } from 'src/enums/role.enum';
+import { JWTlifespan, RefreshLifespan } from './cookies';
+import { jwtConstants } from './constants';
 
 @Injectable()
 export class AuthService {
@@ -46,11 +48,13 @@ export class AuthService {
     };
 
     const access_token = await this.jwtService.signAsync(payload, {
-      expiresIn: '15m', // access token ważny 15 minut
+      secret: jwtConstants.secret,
+      expiresIn: JWTlifespan,
     });
 
     const refresh_token = await this.jwtService.signAsync(payload, {
-      expiresIn: '7d', // refresh token ważny 7 dni
+      secret: jwtConstants.secret,
+      expiresIn: RefreshLifespan,
     });
 
     //* zapisz refresh token do bazy
@@ -77,6 +81,4 @@ export class AuthService {
       role: Role.User,
     });
   }
-
-
 }
