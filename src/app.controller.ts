@@ -1,32 +1,39 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { AppService } from './app.service';
-import { EventPattern } from '@nestjs/microservices';
+import { EventPattern, MessagePattern } from '@nestjs/microservices';
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
-  }
+  // odbiorca wiadomości
+  // @MessagePattern({ cmd: 'hello' })
+  // handleHello(data: string): string {
+  //   console.log('Received message:', data);
+  //   return `Hello, ${data}!`;
+  // }
 
-  @EventPattern('user_created') //<- routing key
-  handleUserCreated(data: any) {
-    console.log('User received in consumer:', data);
-  }
+  // @Get('hello')
+  // async getHello(@Query('name') name: string): Promise<string> {
+  //   return this.appService.sendHello(name);
+  // }
 
-  @EventPattern('nest_from_spring') //<- routing key
-  handleNestFromSpring(data: string) {
-    console.log('Message received from Spring:', data);
-  }
+  // @EventPattern('user_created') //<- routing key
+  // handleUserCreated(data: any) {
+  //   console.log('User received in consumer:', data);
+  // }
 
-  @Post('send')
-  send(@Body() user: any) {
-    return this.appService.sendUserData(user);
-  }
+  // @EventPattern('nest_from_spring') //<- routing key
+  // handleNestFromSpring(data: string) {
+  //   console.log('Message received from Spring:', data);
+  // }
 
-  @Get('nest-to-spring')
-  nestToSpring(@Query('message') message: string) {
-    return this.appService.sendStringToSpring(message);
-  }
+  // @Post('send')
+  // send(@Body() user: any) {
+  //   return this.appService.sendUserData(user);
+  // }
+
+  // @Get('nest-to-spring')
+  // nestToSpring(@Query('message') message: string) {
+  //   return this.appService.sendStringToSpring(message);
+  // }
 }

@@ -9,16 +9,15 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // serwis nasłuchujący
-  // app.connectMicroservice<MicroserviceOptions>({
-  //   transport: Transport.RMQ,
-  //   options: {
-  //     urls: ['amqp://localhost:5672'],
-  //     queue: 'user_queue',
-  //     queueOptions: { durable: false },
-  //   },
-  // });
-
-  // await app.startAllMicroservices();
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.RMQ,
+    options: {
+      urls: ['amqp://localhost:5672'],
+      queue: 'test_queue',
+      queueOptions: { durable: false },
+    },
+  });
+  await app.startAllMicroservices();
 
   app.use(cookieParser());
   app.setViewEngine('ejs');
